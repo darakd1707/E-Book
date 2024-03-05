@@ -6,6 +6,45 @@ const Op = require(`sequelize`).Op
 // const upload = require('./upload-image').single(`foto`)
 const md5 = require(`md5`)
 
+exports.Login = async (request, response) => {
+    try {
+        const params = {
+            email: request.body.email,
+            password: md5(request.body.password),
+        };
+        const findUser = await userModel.findOne({ where: params }); //nemuin user sesuai email dan password
+        if (findUser == null) {
+            return response.status(400).json({
+                message: "You can't log in",
+            });
+        }
+        let tokenPayLoad = {
+            UserID: findUser.id,
+            email: findUser.email,
+            role: findUser.role,
+            nama_user: findUser.nama_user
+        }
+        tokenPayLoad = JSON.stringify(tokenPayLoad)
+        let token = await jsonwebtoken.sign(tokenPayLoad, SECRET_KEY)
+        return response.status(200).json({
+            message: "Success login",
+            data: { //yang login siapa
+                token: token,
+                id_user: findUser.id_user,
+                nama_user: findUser.nama_user,
+                username: findUser.username,
+                role: findUser.role
+            }
+        })
+    }
+    catch (error) {
+        console.log(error);
+        return response.status(400).json({
+            message: error
+        })
+    }
+}
+
 exports.getAllUser = async (request, response) => {
     let users = await userModel.findAll()
     return response.json({
