@@ -4,9 +4,9 @@ const userModel = require(`../models/index`).user
 const bookModel = require(`../models/index`).book
 const adminModel = require(`../models/index`).admin
 const kategoriModel = require(`../models/index`).kategori
-
 const transaksiModel = require(`../models/index`).transaksi
 const Op = require(`sequelize`).Op
+
 exports.getAllTransaksi = async(request, response) => {
     let transaksis = await transaksiModel.findAll() 
     return response.json({
