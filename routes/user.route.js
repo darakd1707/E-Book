@@ -13,12 +13,8 @@ app.delete("/delete/:id", auth.authVerify, checkRole(["admin"]), userController.
 app.post("/login", userController.Login)
 app.put("/:id", userController.updateUser)
 app.get("/findAllCustomer", userController.findAllCustomer)
+app.get("/findAllAdmin", userController.findAllAdmin)
 app.post("/RegisterCustomer", userController.RegisterCustomer)
-
-app.get("/", userController.getAllUser)
-app.get("/find", userController.findUser)
-app.post("/", userController.addUser)
-app.put("/:UserID", userController.updateUser)
-app.delete("/:UserID", userController.deleteUser)
+app.post("/RegisterLoginCustomer", userController.LoginRegister)
 
 module.exports = app
