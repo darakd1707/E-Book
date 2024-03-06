@@ -1,7 +1,7 @@
 const express = require(`express`)
 const app = express()
-app.use(express.json())
 const detailtransaksiController = require(`../controllers/detailtransaksi.controller`)
+app.use(express.json())
 
 app.get("/", detailtransaksiController.getAllDetailtransaksi)
 app.get("/:find", detailtransaksiController.findDetailtransaksi)
