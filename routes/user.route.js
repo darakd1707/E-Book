@@ -10,11 +10,13 @@ app.get("/getAll", auth.authVerify, checkRole(["admin"]), userController.getAllU
 app.get("/findOne/:id", auth.authVerify, checkRole(["admin"]),userController.findUser)
 app.post("/addByAdmin", checkRole(["admin"]), userController.addUser)
 app.delete("/delete/:id", auth.authVerify, checkRole(["admin"]), userController.deleteUser)
-app.post("/login", userController.Login)
+app.post("/loginadmin", userController.LoginAdmin)
+app.post("/login", userController.LoginCustomer)
 app.put("/:id", userController.updateUser)
 app.get("/findAllCustomer", userController.findAllCustomer)
 app.get("/findAllAdmin", userController.findAllAdmin)
 app.post("/RegisterCustomer", userController.RegisterCustomer)
 app.post("/RegisterLoginCustomer", userController.LoginRegister)
+app.post("/logout", userController.Logout);
 
 module.exports = app

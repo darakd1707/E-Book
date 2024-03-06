@@ -2,7 +2,7 @@ const userModel = require(`../models/index`).user
 const Op = require(`sequelize`).Op
 const path = require(`path`)
 const fs = require(`fs`)
-const upload = require('./upload-image').single(`foto`)
+const upload = require('./upload-img-user').single(`foto`)
 const md5 = require(`md5`)
 const jsonwebtoken = require('jsonwebtoken')
 const SECRET_KEY = "jualbukuhalal"
@@ -79,7 +79,58 @@ exports.RegisterCustomer = (request, response) => { //buat user baru yang belum 
     });
 }
 
-exports.Login = async (request, response) => {
+exports.LoginCustomer = async (request, response) => {
+    try {
+        const params = { //masukin email sm password buat value nya
+            email: request.body.email,
+            password: md5(request.body.password),
+            role: "customer"
+        };
+        const findUser = await userModel.findOne({ where: params }); //nemuin user sesuai email dan password
+        if (findUser == null) { //kalo ga ada
+            return response.status(400).json({
+                message: "You can't log in", //ga bisa log in
+            });
+        }
+        let tokenPayLoad = { //bikin payload biar bisa dpt token
+            UserID: findUser.id,
+            email: findUser.email,
+            role: findUser.role,
+            nama: findUser.nama
+        }
+        tokenPayLoad = JSON.stringify(tokenPayLoad)
+        let token = await jsonwebtoken.sign(tokenPayLoad, SECRET_KEY) //payload yang udah ada di sign in pake library jwt
+
+        const cookie = serialize("token", token, { //mengatur cookie dari token
+            httpOnly: true, //cuma bisa diakses dari http, gabisa dari js nya user
+            secure: process.env.NODE_ENV === "production", //cookie hanya dikirim dari https
+            path: "/", //bisa diakses di semua path
+            sameSite: "strict", //cookie hanya akan dikirim kalo request nya dari web yang sama
+            maxAge: 60 * 60 * 24 * 1, // expired setelah 1 hari 
+          });
+      
+          response.setHeader("Set-Cookie", cookie);
+
+        return response.status(200).json({ //klo bisa, muncul pesan "hore uhuy bisa"
+            message: "Success login",
+            data: { //yang login siapa
+                token: token,
+                id_user: findUser.id_user,
+                nama: findUser.nama,
+                email: findUser.email,
+                role: findUser.role
+            }
+        })
+    }
+    catch (error) {
+        console.log(error);
+        return response.status(400).json({
+            message: error
+        })
+    }
+}
+
+exports.LoginAdmin = async (request, response) => {
     try {
         const params = { //masukin email sm password buat value nya
             email: request.body.email,
@@ -99,6 +150,17 @@ exports.Login = async (request, response) => {
         }
         tokenPayLoad = JSON.stringify(tokenPayLoad)
         let token = await jsonwebtoken.sign(tokenPayLoad, SECRET_KEY) //payload yang udah ada di sign in pake library jwt
+
+        const cookie = serialize("token", token, { //mengatur cookie dari token
+            httpOnly: true, //cuma bisa diakses dari http, gabisa dari js nya user
+            secure: process.env.NODE_ENV === "production", //cookie hanya dikirim dari https
+            path: "/", //bisa diakses di semua path
+            sameSite: "strict", //cookie hanya akan dikirim kalo request nya dari web yang sama
+            maxAge: 60 * 60 * 24 * 1, // expired setelah 1 hari 
+          });
+      
+          response.setHeader("Set-Cookie", cookie);
+
         return response.status(200).json({ //klo bisa, muncul pesan "hore uhuy bisa"
             message: "Success login",
             data: { //yang login siapa
@@ -117,6 +179,29 @@ exports.Login = async (request, response) => {
         })
     }
 }
+
+exports.Logout = async (request, response) => {
+    try {
+      const cookie = serialize("token", "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        sameSite: "strict",
+        maxAge: -1, // mengatur masa berlaku cookie menjadi 0 dan menghapus cookie
+      });
+      response.setHeader("Set-Cookie", cookie);
+  
+      return response.status(200).json({
+        message: "Success logout",
+      });
+    } catch (error) {
+      console.log(error);
+      return response.status(500).json({
+        message: "Internal error",
+        err: error,
+      });
+    }
+  };
 
 //ini sebenernya buat ngecek doang si user uda login apa belum, ntar klo udah ada frontend nya baru keliatan fungsinya
 exports.LoginRegister = async (request, response) => {
@@ -316,7 +401,7 @@ exports.updateUser = (request, response) => {
         }
 
         userModel
-            .update(dataUser, { where: { id: idUser } })
+            .update(dataUser, { where: { id: UserID } })
             .then((result) => {
                 return response.json({
                     success: true,

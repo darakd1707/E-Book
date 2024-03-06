@@ -3,11 +3,14 @@ const app = express()
 const cors = require(`cors`)
 const bodyParser = require('body-parser')
 const userRoute = require(`./routes/user.route`)
-const adminRoute = require(`./routes/admin.route`)
 const bookRoute = require(`./routes/book.route`)
 const kategoriRoute = require(`./routes/kategori.route`)
 const transaksiRoute = require(`./routes/transaksi.route`)
+const cookieParser = require("cookie-parser");
 
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors())
 app.use(`/user`, userRoute)
 app.use(`/book`, bookRoute)

@@ -1,6 +1,5 @@
 const { request, response } = require("express")
-
-const upload = require('./upload-image').single('filename')
+const upload = require('./upload-img-book').single('foto')
 const bookModel = require(`../models/index`).book
 const Op = require(`sequelize`).Op
 const path = require('path')

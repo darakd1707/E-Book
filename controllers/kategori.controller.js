@@ -1,16 +1,22 @@
 const { request, response } = require("express")
-
 const kategoriModel = require(`../models/index`).ketegori
 const Op = require(`sequelize`).Op
+
 exports.getAllKategori = async(request, response) => {
     let kategoris = await kategoriModel.findAll() 
+    if (kategoris.length === 0) {
+        return response.status(400).json({
+            success: false,
+            message: "no category to show",
+        });
+    }
     return response.json({
         success: true, 
         data: kategoris,
-        message: `All Kategori have been loaded`
+        message: `All category have been loaded`
     })    
 }
-
+    
 exports.findKategori = async (request, response) => {
     let keyword = request.body.keyword
     let kategoris = await kategoriModel.findAll({ 
