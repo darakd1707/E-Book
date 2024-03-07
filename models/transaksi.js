@@ -27,10 +27,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     UserID: DataTypes.INTEGER,
     TglTransaksi: DataTypes.INTEGER,
+    Qty: DataTypes.INTEGER,
     Total: DataTypes.INTEGER,
     MetodePay: DataTypes.STRING,
-    Status: DataTypes.ENUM("Lunas","Belum Lunas"),
-    AdminID: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'transaksi',

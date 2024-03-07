@@ -25,7 +25,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     TransaksiID: DataTypes.INTEGER,
     BookID: DataTypes.INTEGER,
-    Qyt: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'DetailTransaksi',

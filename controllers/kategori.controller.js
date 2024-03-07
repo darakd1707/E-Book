@@ -30,17 +30,15 @@ exports.findKategori = async (request, response) => {
     return response.json({
          success: true, 
          data: kategoris,
-         message: `All Kategori have been loaded`
+         message: `All category have been loaded`
     })
 }
 
 exports.addKategori = (request, response) => {
     let newKategori = {
-        KategoriID: request.body.KategoriID, 
         namaKat: request.body.namaKat
     }
 
-    
     kategoriModel.create(newKategori)
     .then(result => {
         return response.json({
@@ -57,42 +55,80 @@ exports.addKategori = (request, response) => {
     })
 }
 
-exports.updateKategori = (request, response) => {
-    let dataKategori = {
-        KategoriID: request.body.KategoriID,
-        namaKat: request.body.namaKat
+exports.updateKategori = async (request, response) => {
+    let katID = request.params.id; //user mana yang mau di update
+
+    let getId = await kategoriModel.findAll({ //dicari usernya
+        where: {
+            [Op.and]: [{ id: katID }],
+        },
+    });
+
+    if (getId.length === 0) { //klo ga nemu
+        return response.status(400).json({
+            success: false,
+            message: "kategori dengan id tersebut tidak ada",
+        });
     }
 
-    let KategoriID = request.params.KategoriID
- 
-    kategoriModel.update(dataKategori, { where: { id: KategoriID } })
-        .then(result => {
-            return response.json({
-            success: true,
-            message: `Data Kategori has been updated`
-            })
-        })
-        .catch(error => {
-            return response.json({
-                success: false, 
-                message: error.message
-            })
-        })
-}
+    let katBaru = { //data terbaru yang udah di update
+            namaKat: request.body.nama,
+    };
 
-exports.deleteKategori = (request, response) => {
-    let KategoriID = request.params.KategoriID
-     kategoriModel.destroy({ where: { id: KategoriID } })
-        .then(result => {
+    if ( //kalo ada yang kosong
+        katBaru.namaKat === "" 
+    ) {
+        return response.status(400).json({
+            success: false,
+            message:
+                "Harus diisi semua.Kalau tidak ingin merubah, isi dengan value sebelumnya",
+        });
+    }
+
+    kategoriModel
+        .update(katBaru, { where: { id: katID } })
+        .then((result) => {
             return response.json({
                 success: true,
-                message: `Data Kategori has been updated`
-            })
+                message: `Data kategoi has been updated`,
+            });
         })
-        .catch(error => {
-            return response.json({
+        .catch((error) => {
+            return response.status(400).json({
                 success: false,
-                message: error.message
-            })
+                message: error.message,
+            });
+        });
+}
+
+exports.deleteKategori = async (request, response) => {
+    let katID = request.params.id; //cari user berdasarkan ID
+    let getId = await kategoriModel.findAll({
+        where: { //dicari 
+            [Op.and]: [{ id: katID }],
+        },
+    });
+
+    if (getId.length === 0) { //kalo ga ada yang sesuai
+        return response.status(400).json({
+            success: false,
+            message: "kategori dengan id tersebut tidak ada",
+        });
+    }
+
+    kategoriModel
+        .destroy({ where: { id: katID } })
+
+        .then((result) => {
+            return response.json({
+                success: true,
+                message: `data category has ben delete where id :` + idUser,
+            });
         })
+        .catch((error) => {
+            return response.status(400).json({
+                success: false,
+                message: error.message,
+            });
+        });
     }
