@@ -84,7 +84,7 @@ exports.LoginCustomer = async (request, response) => {
         const params = { //masukin email sm password buat value nya
             email: request.body.email,
             password: md5(request.body.password),
-            role: "customer"
+            role: "user"
         };
         const findUser = await userModel.findOne({ where: params }); //nemuin user sesuai email dan password
         if (findUser == null) { //kalo ga ada
@@ -462,7 +462,7 @@ exports.findUser = async (request, response) => {
 }
 
 exports.findAllCustomer = async (request, response) => {
-    let user = await userModel.findAll({ where: { role: "customer" } }); //dicari yang role nya customer/user
+    let user = await userModel.findAll({ where: { role: "user" } }); //dicari yang role nya customer/user
     if (user.length === 0) { //klo ga ada
         return response.status(400).json({
             success: false,

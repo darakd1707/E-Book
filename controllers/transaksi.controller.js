@@ -3,8 +3,8 @@ const transaksi = require("../models/transaksi")
 
 const userModel = require(`../models/index`).user
 const bookModel = require(`../models/index`).book
-const kategoriModel = require(`../models/index`).kategori
 const transaksiModel = require(`../models/index`).transaksi
+const detailmodel = require('../models/index').detailtransaksi
 const Op = require(`sequelize`).Op
 
 exports.getAllTransaksi = async (request, response) => {
@@ -44,24 +44,29 @@ exports.findTransaksi = async (request, response) => {
 }
 
 exports.addTransaksi = async (request, response) => {
-    const id = request.body.id
     const buku = await bookModel.findOne()
     const harga = buku.harga
+    const user = await userModel.findOne()
+    const id = user.UserID
+    const idnyabuku = await bookModel.findOne()
+    const idbuku = idnyabuku.BookID
     const today = new Date()
     const TglTransaksi = `${today.getFullYear()}-${today.getMonth() + 1}-
     ${today.getDate()}${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`
-    const user = await userModel.findOne({
-        where: {
-            [Op.and]: [{ id: id }],
-        },
-    })
+
     let data = {
-        UserID: user,
+        UserID: id,
         TglTransaksi: TglTransaksi,
         Qty: request.body.jumlah,
         MetodePay: request.body.MetodePay,
         total: (Qty * harga)
     }
+
+    let detail = {
+        UserID: id,
+        
+    }
+
     transaksiModel
         .create(data)
         .then(result => {
@@ -77,6 +82,8 @@ exports.addTransaksi = async (request, response) => {
                 message: error.message
             })
         })
+
+    
 }
 
 exports.updateTransaksi = async (request, response) => {
@@ -129,8 +136,20 @@ exports.updateTransaksi = async (request, response) => {
         })
 }
 
-exports.deleteTransaksi = (request, response) => {
+exports.deleteTransaksi = async (request, response) => {
     let TransaksiID = request.params.TransaksiID
+    let getId = await transaksiModel.findAll({
+        where: { //dicari 
+            [Op.and]: [{ id: TransaksiID }],
+        },
+    });
+
+    if (getId.length === 0) { //kalo ga ada yang sesuai
+        return response.status(400).json({
+            success: false,
+            message: "transaksi dengan id tersebut tidak ada",
+        });
+    }
     transaksiModel.destroy({ where: { id: TransaksiID } })
         .then(result => {
             return response.json({
