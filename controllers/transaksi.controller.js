@@ -44,46 +44,61 @@ exports.findTransaksi = async (request, response) => {
 }
 
 exports.addTransaksi = async (request, response) => {
-    const buku = await bookModel.findOne()
-    const harga = buku.harga
-    const user = await userModel.findOne()
-    const id = user.UserID
-    const idnyabuku = await bookModel.findOne()
-    const idbuku = idnyabuku.BookID
-    const today = new Date()
-    const TglTransaksi = `${today.getFullYear()}-${today.getMonth() + 1}-
-    ${today.getDate()}${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`
+    try {
+        const buku = await bookModel.findOne()
+        const harga = buku.harga
+        const user = await userModel.findOne()
+        const id = user.UserID
+        const idnyabuku = await bookModel.findOne()
+        const idbuku = idnyabuku.BookID
+        const idtransaksi = await transaksiModel.findOne()
+        const idtrans = idtransaksi.TransaksiID
+        const today = new Date()
+        const TglTransaksi = `${today.getFullYear()}-${today.getMonth() + 1}-
+        ${today.getDate()}${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`
 
-    let data = {
-        UserID: id,
-        TglTransaksi: TglTransaksi,
-        Qty: request.body.jumlah,
-        MetodePay: request.body.MetodePay,
-        total: (Qty * harga)
-    }
+        let data = {
+            UserID: id,
+            TglTransaksi: TglTransaksi,
+            Qty: request.body.jumlah,
+            MetodePay: request.body.MetodePay,
+            total: (request.body.jumlah * harga)
+        }
 
-    let detail = {
-        UserID: id,
-        
-    }
+        let detail = {
+            UserID: id,
+            BookID: idbuku,
+            TransaksiID: idtrans
+        }
 
-    transaksiModel
-        .create(data)
-        .then(result => {
-            return res.json({
+        const transaction = await sequelize.transaction();
+
+        try {
+            const hasiltransaksi = await transaksiModel.create(data, { transaction })
+            detail.TransaksiID = hasiltransaksi.TransaksiID;
+            detail.BookID = buku.BookID;
+            await detailmodel.create(detail, { transaction });
+            await transaction.commit(); //simpan transaksi
+
+            return response.json({
                 success: true,
-                data: result,
+                data: transaksiResult,
                 message: "New transaksi has been inserted"
-            })
-        })
-        .catch(error => {
-            return res.json({
+            });
+
+        } catch (error) {
+            await transaction.rollback(); //transaksi di cancel
+            return response.json({
                 success: false,
                 message: error.message
-            })
-        })
-
-    
+            });
+        }
+    } catch (error) {
+        return response.json({
+            success: false,
+            message: error.message
+        });
+    }
 }
 
 exports.updateTransaksi = async (request, response) => {
