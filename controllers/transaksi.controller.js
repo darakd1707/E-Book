@@ -46,13 +46,13 @@ exports.findTransaksi = async (request, response) => {
 exports.addTransaksi = async (request, response) => {
     try {
         const buku = await bookModel.findOne()
-        const harga = buku.harga
+        const harga = buku.harga //ambil harga
         const user = await userModel.findOne()
-        const id = user.UserID
+        const id = user.UserID //ambil id user
         const idnyabuku = await bookModel.findOne()
-        const idbuku = idnyabuku.BookID
+        const idbuku = idnyabuku.BookID //ambil id buku
         const idtransaksi = await transaksiModel.findOne()
-        const idtrans = idtransaksi.TransaksiID
+        const idtrans = idtransaksi.TransaksiID //ambil id transaksi
         const today = new Date()
         const TglTransaksi = `${today.getFullYear()}-${today.getMonth() + 1}-
         ${today.getDate()}${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`
@@ -62,7 +62,7 @@ exports.addTransaksi = async (request, response) => {
             TglTransaksi: TglTransaksi,
             Qty: request.body.jumlah,
             MetodePay: request.body.MetodePay,
-            total: (request.body.jumlah * harga)
+            total: (Qty * harga)
         }
 
         let detail = {

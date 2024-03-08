@@ -1,6 +1,8 @@
-const checkRole = (allowedRole) => { //ngatur role yang dibolehin
-    return (req, res, next) => {
-        const userRole = req.userData.role //cari role nya user dari database
+const userModel = require('../models/index').user
+const checkRole =  (allowedRole) => { //ngatur role yang dibolehin
+    return async (req, res, next) => {
+        const admin = await userModel.findOne();
+        const userRole = admin.role //cari role nya user dari database
         console.log(userRole)
         if(allowedRole.includes(userRole)){ //kalo sesuai kriteria
             next()
